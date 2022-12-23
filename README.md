@@ -1,6 +1,4 @@
-# Guy-Lab
-
-Certainly! Here is a more detailed version of the text:
+# GuyShaniLab
 
 This repository is a collaborative space for code sharing between students who are being guided by Professor Guy Shani. It is intended to be a place where students can share their code and learn from one another as they work on various projects and assignments.
 
