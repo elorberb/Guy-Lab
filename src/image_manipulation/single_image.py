@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import os
 
+
 def resize_image(image, width, height):
     """Resizes an image to the specified width and height.
 
