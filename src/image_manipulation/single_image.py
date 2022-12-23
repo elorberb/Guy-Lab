@@ -5,10 +5,6 @@ import numpy as np
 import cv2
 import os
 
-
-# ----- Single Image Manipulation -----
-
-
 def resize_image(image, width, height):
     """Resizes an image to the specified width and height.
 
@@ -109,69 +105,69 @@ def threshold(image, threshold_value):
     return binary_image
 
 
-# ----- Multiple Images Manipulation -----
-
-
-def read_images(dir_path):
+def dilation(image, kernel_size):
     """
-    Read all images in a directory and return them as a list of NumPy arrays.
+    Dilates the given image by adding pixels around lighter areas.
 
     Parameters:
-        dir_path (str): The path to the directory containing the images.
+    image (numpy array): the image to dilate
+    kernel_size (int): the size of the kernel to use for dilation
 
     Returns:
-        images: A list of NumPy arrays representing the images.
+    numpy array: the dilated image
     """
-    images = []
-    for filename in os.listdir(dir_path):
-        # Check if file is an image
-        if filename.endswith(".png") or filename.endswith(".jpg") or filename.endswith(".PNG") or filename.endswith(
-                ".JPG"):
-            # Read image and store as NumPy array
-            filepath = os.path.join(dir_path, filename)
-            image = cv2.imread(filepath)
-            images.append(image)
-    return images
+    # Create a kernel of the specified size
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
+
+    # Apply dilation to the image
+    dilated_image = cv2.dilate(image, kernel)
+
+    return dilated_image
 
 
-def cut_images(image, patch_height=300, patch_width=300):
+def rgb_to_hsv(image):
     """
-    Cut an image into smaller images of a given height and width.
+    Converts the given image from RGB to HSV color space.
 
     Parameters:
-        image (ndarray): The image to be cut, represented as a NumPy array.
-        patch_height (int, optional): The height of the smaller images. Default is 300.
-        patch_width (int, optional): The width of the smaller images. Default is 300.
+    image (numpy array): the image to convert
 
     Returns:
-        list: A list of tuples, each containing a smaller image (as a NumPy array) and the starting coordinates (i and j) of the image in the original image.
+    numpy array: the image in HSV color space
     """
-    patches = []
-    width, height, _ = image.shape
-    for i in range(0, height, patch_height):
-        for j in range(0, width, patch_width):
-            patch = image[j:j + patch_width, i:i + patch_height]
-            patches.append((patch, i, j))
-    return np.array(patches)
+    # Convert the image from RGB to HSV
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    return hsv_image
 
 
-def save_patches(image_name, patches, dir_path):
+def rgb_to_lab(image):
     """
-  Saves the given patches with the original image name as the prefix in the specified directory.
+    Converts the given image from RGB to LAB color space.
 
-  Parameters:
-  image_name (str): the original image name to use as the prefix for the file names
-  patches (list): a list of patches (images) to save
-  dir_path (str): the directory to save the patches in
+    Parameters:
+    image (numpy array): the image to convert
 
-  Returns:
-  None
-  """
-    for i, patch in enumerate(patches):
-        cv2.imwrite(f"{dir_path}/{image_name}_p{i}.jpg", patch)
+    Returns:
+    numpy array: the image in LAB color space
+    """
+    # Convert the image from RGB to LAB
+    lab_image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+
+    return lab_image
 
 
-if __name__ == '__main__':
-    path = 'C:\\Users\\elorberb\\PycharmProjects\\BGU projects\\Guy-Lab\\trichomes_images\\camera_day2\\Camera2'
-    imgs = read_images(path)
-    print(imgs[0])
+def contrast_stretch(image):
+    """
+    Performs contrast stretching on the given image.
+
+    Parameters:
+    image (numpy array): the image to stretch
+
+    Returns:
+    numpy array: the contrast-stretched image
+    """
+    # Perform contrast stretching on the image
+    stretched_image = cv2.normalize(image, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+
+    return stretched_image
