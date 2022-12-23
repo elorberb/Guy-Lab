@@ -86,24 +86,32 @@ def reduce_noise(image, strength=20, h=10, hColor=7, templateWindowSize=21):
     return denoised_image
 
 
-def threshold(image, threshold_value):
+def apply_threshold(image, method='otsu', block_size=5, offset=2):
     """
-    Thresholds the given image by setting all pixels above the threshold value to white and all pixels below the threshold value to black.
+    Apply thresholding to separate objects from the background.
 
     Parameters:
-    image (numpy array): the image to threshold
-    threshold_value (int): the threshold value
+        image (ndarray): The image to be processed.
+        method (str, optional): The thresholding method to use. Can be 'otsu' or 'adaptive'. Default is 'otsu'.
+        block_size (int, optional): The size of the neighborhood for adaptive thresholding. Default is 5.
+        offset (int, optional): The constant subtracted from the mean or weighted mean for adaptive thresholding. Default is 2.
 
     Returns:
-    numpy array: the thresholded image
+        ndarray: The image with trichomes highlighted.
     """
     # Convert the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Apply thresholding to the image
-    _, binary_image = cv2.threshold(gray, threshold_value, 255, cv2.THRESH_BINARY)
+    if method == 'otsu':
+        # Use Otsu's thresholding method
+        _, threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    elif method == 'adaptive':
+        # Use adaptive thresholding
+        threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, block_size, offset)
+    else:
+        raise ValueError('Invalid thresholding method: {}'.format(method))
 
-    return binary_image
+    return threshold
 
 
 def dilation(image, kernel_size):
@@ -172,3 +180,31 @@ def contrast_stretch(image):
     stretched_image = cv2.normalize(image, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
 
     return stretched_image
+
+
+def detect_edges(image, method='canny', low_threshold=50, high_threshold=150):
+    """
+    Detect edges in an image using the Canny or Sobel edge detection algorithm.
+
+    Args:
+        image (ndarray): The image to be processed, represented as a NumPy array.
+        method (str, optional): The edge detection method to use. Can be 'canny' or 'sobel'. Default is 'canny'.
+        low_threshold (int, optional): The low threshold for the Canny edge detector. Default is 50.
+        high_threshold (int, optional): The high threshold for the Canny edge detector. Default is 150.
+
+    Returns:
+        ndarray: The image with edges highlighted, represented as a NumPy array.
+    """
+    if method == 'canny':
+        # Use the Canny edge detector
+        edges = cv2.Canny(image, low_threshold, high_threshold)
+    elif method == 'sobel':
+        # Convert the image to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # Use the Sobel edge detector
+        edges = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=5)
+    else:
+        raise ValueError('Invalid edge detection method: {}'.format(method))
+
+    return edges
